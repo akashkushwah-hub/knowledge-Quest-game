@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Quest: Catch & Learn</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            color: #fff;
+            padding: 10px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            color: #333;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            animation: popIn 0.4s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 26px;
+        }
+
+        .modal-content p {
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 16px;
+            outline: none;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus {
+            border-color: #3498db;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(46, 204, 113, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Main Game Container */
+        .game-container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            align-items: center;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+        }
+
+        .controls-top {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-control {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-control:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-control.active {
+            background: #2ecc71;
+            border-color: #27ae60;
+        }
+
+        /* Tabs Header */
+        .game-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-bottom: 3px solid #2ecc71;
+        }
+
+        .tab-content {
+            display: none;
+            position: relative;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Canvas Area */
+        #gameCanvas {
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            height: 450px;
+            cursor: pointer;
+        }
+
+        /* Journal Section */
+        .journal-container {
+            width: 100%;
+            height: 450px;
+            background: #fdfdfd;
+            color: #333;
+            padding: 20px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .journal-container h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .journal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .journal-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .journal-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .journal-card h4 {
+            color: #2980b9;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .journal-card p {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .empty-journal {
+            text-align: center;
+            color: #888;
+            margin-top: 50px;
+            font-size: 16px;
+        }
+
+        /* Popups */
+        .fact-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 25px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            z-index: 50;
+            display: none;
+            animation: popIn 0.3s ease-out;
+        }
+
+        .fact-popup h3 {
+            color: #e74c3c;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .fact-popup p {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .btn-resume {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-resume:hover {
+            background: #2980b9;
+        }
+
+        /* Mobile touch control buttons */
+        .touch-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.4);
+            width: 100%;
+        }
+
+        .btn-move {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.6);
+            color: white;
+            padding: 12px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn-move:active {
+            background: rgba(255,255,255,0.5);
+        }
+
+        @media (max-width: 600px) {
+            #gameCanvas {
+                height: 380px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- START MODAL -->
+    <div id="startModal" class="modal-overlay">
+        <div class="modal-content">
+            <h1 id="modalTitle">🌟 Knowledge Quest 🌟</h1>
+            <p id="modalDesc">Catch Books, Sports Gear, and Trees to gain wisdom while dodging distracting phone screens!</p>
+            
+            <div class="form-group">
+                <label id="lblLang" for="langSelect">Select Language / भाषा चुनें:</label>
+                <select id="langSelect">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label id="lblDiff" for="diffSelect">Select Difficulty / कठिनाई स्तर चुनें:</label>
+                <select id="diffSelect">
+                    <option value="easy">Easy (Relaxed / आसान)</option>
+                    <option value="medium" selected>Medium (Standard / मध्यम)</option>
+                    <option value="hard">Hard (Fast-paced / कठिन)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label id="lblVoice" for="voiceSelect">Select Voice Profile / आवाज़ चुनें:</label>
+                <select id="voiceSelect">
+                    <option value="male">Soulful Male (Arijit Singh Vibe)</option>
+                    <option value="female">Melodious Female (Shreya Ghoshal Vibe)</option>
+                </select>
+            </div>
+
+            <button id="btnStartGame" class="btn-primary">Start Quest / खेल शुरू करें</button>
+            <button id="btnOpenInstructions" class="btn-secondary">📖 How to Play / कैसे खेलें</button>
+        </div>
+    </div>
+
+    <!-- INSTRUCTIONS MODAL -->
+    <div id="instructionsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 id="instTitle" style="color: #2c3e50; margin-bottom: 15px;">📖 How to Play</h2>
+            <div id="instText" style="text-align: left; font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px;">
+                <p><strong>1. Move Basket:</strong> Use Left/Right arrow keys, A/D keys, or drag with your mouse/touch to move the basket.</p>
+                <p><strong>2. Catch Good Items:</strong> Catch Books (📚), Sports Gear (⚽), and Trees (🌳) to gain points, unlock fun facts, and hear voice narration!</p>
+                <p><strong>3. Avoid Phone Screens:</strong> Stay away from distracting glowing phone screens (📱) to protect your focus.</p>
+                <p><strong>4. Knowledge Journal:</strong> Check the Journal tab anytime to review facts you've discovered.</p>
+            </div>
+            <button id="btnCloseInstructions" class="btn-primary">Got it! / समझ गए!</button>
+        </div>
+    </div>
+
+    <!-- MAIN GAME CONTAINER -->
+    <div id="gameContainer" class="game-container">
+        <!-- Header -->
+        <div class="game-header">
+            <div class="stats">
+                <div class="stat-item"><span id="lblScoreText">Score</span>: <span id="scoreVal">0</span></div>
+                <div class="stat-item"><span id="lblRankText">Rank</span>: <span id="rankVal">Novice</span></div>
+            </div>
+            <div class="controls-top">
+                <button id="btnBgmToggle" class="btn-control active">🎵 Ambient: ON</button>
+                <button id="btnVoiceToggle" class="btn-control active">🔊 Voice: ON</button>
+                <button id="btnHome" class="btn-control">🏠 Home</button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="game-tabs">
+            <button id="tabGame" class="tab-btn active">🎮 Game / खेल</button>
+            <button id="tabJournal" class="tab-btn">📚 Knowledge Journal / ज्ञान पत्रिका</button>
+        </div>
+
+        <!-- Game Tab Content -->
+        <div id="contentGame" class="tab-content active">
+            <canvas id="gameCanvas" width="800" height="450"></canvas>
+            
+            <!-- Mobile Controls -->
+            <div class="touch-controls">
+                <button id="btnLeft" class="btn-move">⬅️</button>
+                <button id="btnRight" class="btn-move">➡️</button>
+            </div>
+
+            <!-- Educational Fact Popup -->
+            <div id="factPopup" class="fact-popup">
+                <h3 id="popupTitle">Title</h3>
+                <p id="popupFact">Fact text goes here...</p>
+                <button id="btnResume" class="btn-resume">Continue / आगे बढ़ें</button>
+            </div>
+        </div>
+
+        <!-- Journal Tab Content -->
+        <div id="contentJournal" class="tab-content">
+            <div class="journal-container">
+                <h2 id="journalHeading">Your Discovered Knowledge / आपका खोजा गया ज्ञान</h2>
+                <div id="journalGrid" class="journal-grid">
+                    <div class="empty-journal" id="emptyJournalMsg">No facts collected yet! Catch books, sports items, and trees in the game to unlock wisdom.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio API Sound Synthesizer & Background Ambient Generator
+        let audioCtx = null;
+        let bgmInterval = null;
+        let isBgmEnabled = true;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    audioCtx = new AudioContext();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        const soundFX = {
+            playCatch: function() {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, now); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.25);
+            },
+
+            playTrap: function() {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(60, now + 0.3);
+
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.3);
+            },
+
+            playClick: function() {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        };
+
+        // Ambient Background Music Generator (Gentle Arpeggio Loop)
+        function startBgm() {
+            if (bgmInterval) return;
+            const chords = [220, 261.63, 329.63, 392.00]; // A minor chord frequencies
+            let step = 0;
+
+            bgmInterval = setInterval(() => {
+                if (!isBgmEnabled) return;
+                const ctx = getAudioContext();
+                if (!ctx) return;
+
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(chords[step % chords.length], now);
+
+                gain.gain.setValueAtTime(0.03, now);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 1.2);
+
+                step++;
+            }, 1000);
+        }
+
+        function stopBgm() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        const translations = {
+            en: {
+                title: "🌟 Knowledge Quest 🌟",
+                desc: "Catch Books, Sports Gear, and Trees to gain wisdom while dodging distracting phone screens!",
+                langLabel: "Select Language / भाषा चुनें:",
+                diffLabel: "Select Difficulty / कठिनाई स्तर चुनें:",
+                voiceLabel: "Select Voice Profile / आवाज़ चुनें:",
+                maleVoice: "Soulful Male (Arijit Singh Vibe)",
+                femaleVoice: "Melodious Female (Shreya Ghoshal Vibe)",
+                startBtn: "Start Quest / खेल शुरू करें",
+                instBtn: "📖 How to Play / कैसे खेलें",
+                instHeading: "📖 How to Play",
+                instBody: `
+                    <p><strong>1. Move Basket:</strong> Use Left/Right arrow keys, A/D keys, or drag with your mouse/touch to move the basket.</p>
+                    <p><strong>2. Catch Good Items:</strong> Catch Books (📚), Sports Gear (⚽), and Trees (🌳) to gain points, unlock fun facts, and hear voice narration!</p>
+                    <p><strong>3. Avoid Phone Screens:</strong> Stay away from distracting glowing phone screens (📱) to protect your focus.</p>
+                    <p><strong>4. Knowledge Journal:</strong> Check the Journal tab anytime to review facts you've discovered.</p>
+                `,
+                gotIt: "Got it! / समझ गए!",
+                score: "Score",
+                rank: "Rank",
+                gameTab: "🎮 Game",
+                journalTab: "📚 Knowledge Journal",
+                journalHeading: "Your Discovered Knowledge",
+                emptyJournal: "No facts collected yet! Catch books, sports items, and trees in the game to unlock wisdom.",
+                continueBtn: "Continue",
+                voiceOn: "🔊 Voice: ON",
+                voiceOff: "🔇 Voice: OFF",
+                bgmOn: "🎵 Ambient: ON",
+                bgmOff: "🔇 Ambient: OFF",
+                homeBtn: "🏠 Home",
+                ranks: ["Curious Cub", "Knowledge Seeker", "Wise Explorer", "Master of Wisdom"]
+            },
+            hi: {
+                title: "🌟 ज्ञान खोज (Knowledge Quest) 🌟",
+                desc: "किताबें, खेल का सामान और पेड़ पकड़कर ज्ञान प्राप्त करें और फोन स्क्रीन से दूर रहें!",
+                langLabel: "भाषा चुनें / Select Language:",
+                diffLabel: "कठिनाई स्तर चुनें / Select Difficulty:",
+                voiceLabel: "आवाज़ चुनें / Select Voice Profile:",
+                maleVoice: "सुलभ पुरुष (अरिजीत सिंह वाइब)",
+                femaleVoice: "मधुर महिला (श्रेया घोषाल वाइब)",
+                startBtn: "खेल शुरू करें / Start Quest",
+                instBtn: "📖 कैसे खेलें / How to Play",
+                instHeading: "📖 कैसे खेलें",
+                instBody: `
+                    <p><strong>1. बास्केट हिलाएं:</strong> बास्केट को ले जाने के लिए तीर कुंजियों (Left/Right), A/D कुंजियों का उपयोग करें या माउस/टच से खींचें।</p>
+                    <p><strong>2. अच्छी वस्तुएं पकड़ें:</strong> अंक प्राप्त करने, मजेदार तथ्य अनलॉक करने और आवाज़ सुनने के लिए किताबें (📚), खेल का सामान (⚽), और पेड़ (🌳) पकड़ें!</p>
+                    <p><strong>3. फोन स्क्रीन से बचें:</strong> अपने ध्यान को सुरक्षित रखने के लिए चमकती फोन स्क्रीन (📱) से दूर रहें।</p>
+                    <p><strong>4. ज्ञान पत्रिका:</strong> अपने खोजे गए तथ्यों की समीक्षा करने के लिए किसी भी समय 'ज्ञान पत्रिका' टैब देखें।</p>
+                `,
+                gotIt: "समझ गए! / Got it!",
+                score: "स्कोर",
+                rank: "स्तर",
+                gameTab: "🎮 खेल",
+                journalTab: "📚 ज्ञान पत्रिका",
+                journalHeading: "आपका खोजा गया ज्ञान",
+                emptyJournal: "अभी तक कोई तथ्य एकत्र नहीं किया गया है! खेल में किताबें, खेल की वस्तुएं और पेड़ पकड़कर ज्ञान अनलॉक करें।",
+                continueBtn: "आगे बढ़ें",
+                voiceOn: "🔊 आवाज़: चालू",
+                voiceOff: "🔇 आवाज़: बंद",
+                bgmOn: "🎵 संगीत: चालू",
+                bgmOff: "🔇 संगीत: बंद",
+                homeBtn: "🏠 होम",
+                ranks: ["जिज्ञासु बच्चा", "ज्ञान खोजी", "बुद्धिमान अन्वेषक", "ज्ञान के उस्ताद"]
+            }
+        };
+
+        const database = {
+            en: [
+                {
+                    cat: "Books 📚",
+                    title: "Brain Gym (Reading & Literature)",
+                    fact: "Reading just 6 minutes a day can reduce stress levels by up to 68%! Books expand your imagination and vocabulary.",
+                    symbol: "📚"
+                },
+                {
+                    cat: "Sports ⚽",
+                    title: "Active Body, Sharp Mind (Physical Health)",
+                    fact: "Playing sports releases endorphins, boosts memory, and builds strong bones and muscles for a healthier heart!",
+                    symbol: "⚽"
+                },
+                {
+                    cat: "Nature 🌳",
+                    title: "Earth’s Lungs (Nature & Ecology)",
+                    fact: "Trees produce fresh oxygen for us to breathe and filter out pollutants to keep our air clean and environment cool!",
+                    symbol: "🌳"
+                }
+            ],
+            hi: [
+                {
+                    cat: "किताबें 📚",
+                    title: "मस्तिष्क व्यायाम (पढ़ना और साहित्य)",
+                    fact: "दिन में सिर्फ 6 मिनट पढ़ने से तनाव का स्तर 68% तक कम हो सकता है! किताबें आपकी कल्पना और शब्दावली का विस्तार करती हैं।",
+                    symbol: "📚"
+                },
+                {
+                    cat: "खेल ⚽",
+                    title: "सक्रिय शरीर, तेज़ दिमाग (शारीरिक स्वास्थ्य)",
+                    fact: "खेल खेलने से एंडोर्फिन जारी होता है, याददाश्त बढ़ती है और स्वस्थ हृदय के लिए मजबूत हड्डियां और मांसपेशियां बनती हैं!",
+                    symbol: "⚽"
+                },
+                {
+                    cat: "प्रकृति 🌳",
+                    title: "पृथ्वी के फेफड़े (प्रकृति और पारिस्थितिकी)",
+                    fact: "पेड़ हमारे सांस लेने के लिए ताज़ा ऑक्सीजन पैदा करते हैं और हमारी हवा को साफ और पर्यावरण को ठंडा रखने के लिए प्रदूषकों को फ़िल्टर करते हैं!",
+                    symbol: "🌳"
+                }
+            ]
+        };
+
+        const startModal = document.getElementById('startModal');
+        const instructionsModal = document.getElementById('instructionsModal');
+        const gameContainer = document.getElementById('gameContainer');
+        const langSelect = document.getElementById('langSelect');
+        const diffSelect = document.getElementById('diffSelect');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const btnStartGame = document.getElementById('btnStartGame');
+        const btnOpenInstructions = document.getElementById('btnOpenInstructions');
+        const btnCloseInstructions = document.getElementById('btnCloseInstructions');
+        const scoreVal = document.getElementById('scoreVal');
+        const rankVal = document.getElementById('rankVal');
+        const btnVoiceToggle = document.getElementById('btnVoiceToggle');
+        const btnBgmToggle = document.getElementById('btnBgmToggle');
+        const btnHome = document.getElementById('btnHome');
+        const tabGame = document.getElementById('tabGame');
+        const tabJournal = document.getElementById('tabJournal');
+        const contentGame = document.getElementById('contentGame');
+        const contentJournal = document.getElementById('contentJournal');
+        const factPopup = document.getElementById('factPopup');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupFact = document.getElementById('popupFact');
+        const btnResume = document.getElementById('btnResume');
+        const journalGrid = document.getElementById('journalGrid');
+        const emptyJournalMsg = document.getElementById('emptyJournalMsg');
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let currentLang = 'en';
+        let currentDiff = 'medium';
+        let voiceProfile = 'male';
+        let isVoiceEnabled = true;
+        let score = 0;
+        let isPaused = false;
+        let discoveredItems = [];
+        let gameInterval = null;
+        let animationFrameId = null;
+
+        const basket = {
+            x: canvas.width / 2 - 50,
+            y: canvas.height - 65,
+            width: 100,
+            height: 45,
+            speed: 10,
+            dx: 0
+        };
+
+        let items = [];
+        let particles = [];
+        const keys = { ArrowLeft: false, ArrowRight: false, KeyA: false, KeyD: false };
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code in keys) keys[e.code] = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if (e.code in keys) keys[e.code] = false;
+        });
+
+        document.getElementById('btnLeft').addEventListener('touchstart', () => { basket.dx = -basket.speed; });
+        document.getElementById('btnLeft').addEventListener('touchend', () => { basket.dx = 0; });
+        document.getElementById('btnLeft').addEventListener('mousedown', () => { basket.dx = -basket.speed; });
+        document.getElementById('btnLeft').addEventListener('mouseup', () => { basket.dx = 0; });
+
+        document.getElementById('btnRight').addEventListener('touchstart', () => { basket.dx = basket.speed; });
+        document.getElementById('btnRight').addEventListener('touchend', () => { basket.dx = 0; });
+        document.getElementById('btnRight').addEventListener('mousedown', () => { basket.dx = basket.speed; });
+        document.getElementById('btnRight').addEventListener('mouseup', () => { basket.dx = 0; });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            basket.x = mouseX - basket.width / 2;
+        });
+
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => soundFX.playClick());
+        });
+
+        btnOpenInstructions.addEventListener('click', () => {
+            instructionsModal.style.display = 'flex';
+        });
+
+        btnCloseInstructions.addEventListener('click', () => {
+            instructionsModal.style.display = 'none';
+        });
+
+        btnStartGame.addEventListener('click', () => {
+            currentLang = langSelect.value;
+            currentDiff = diffSelect.value;
+            voiceProfile = voiceSelect.value;
+            startModal.style.display = 'none';
+            gameContainer.style.display = 'flex';
+            updateUIStrings();
+            initGame();
+            if (isBgmEnabled) startBgm();
+        });
+
+        btnHome.addEventListener('click', () => {
+            isPaused = true;
+            clearInterval(gameInterval);
+            cancelAnimationFrame(animationFrameId);
+            window.speechSynthesis.cancel();
+            stopBgm();
+            gameContainer.style.display = 'none';
+            factPopup.style.display = 'none';
+            startModal.style.display = 'flex';
+        });
+
+        langSelect.addEventListener('change', () => {
+            soundFX.playClick();
+            const l = translations[langSelect.value];
+            document.getElementById('modalTitle').innerText = l.title;
+            document.getElementById('modalDesc').innerText = l.desc;
+            document.getElementById('lblLang').innerText = l.langLabel;
+            document.getElementById('lblDiff').innerText = l.diffLabel;
+            document.getElementById('lblVoice').innerText = l.voiceLabel;
+            btnStartGame.innerText = l.startBtn;
+            btnOpenInstructions.innerText = l.instBtn;
+            document.getElementById('instTitle').innerText = l.instHeading;
+            document.getElementById('instText').innerHTML = l.instBody;
+            btnCloseInstructions.innerText = l.gotIt;
+            voiceSelect.options[0].text = l.maleVoice;
+            voiceSelect.options[1].text = l.femaleVoice;
+        });
+
+        function updateUIStrings() {
+            const l = translations[currentLang];
+            document.getElementById('lblScoreText').innerText = l.score;
+            document.getElementById('lblRankText').innerText = l.rank;
+            tabGame.innerText = l.gameTab;
+            tabJournal.innerText = l.journalTab;
+            document.getElementById('journalHeading').innerText = l.journalHeading;
+            btnResume.innerText = l.continueBtn;
+            btnHome.innerText = l.homeBtn;
+            btnBgmToggle.innerText = isBgmEnabled ? l.bgmOn : l.bgmOff;
+            updateRank();
+        }
+
+        btnVoiceToggle.addEventListener('click', () => {
+            isVoiceEnabled = !isVoiceEnabled;
+            const l = translations[currentLang];
+            if (isVoiceEnabled) {
+                btnVoiceToggle.innerText = l.voiceOn;
+                btnVoiceToggle.classList.add('active');
+            } else {
+                btnVoiceToggle.innerText = l.voiceOff;
+                btnVoiceToggle.classList.remove('active');
+                window.speechSynthesis.cancel();
+            }
+        });
+
+        btnBgmToggle.addEventListener('click', () => {
+            isBgmEnabled = !isBgmEnabled;
+            const l = translations[currentLang];
+            if (isBgmEnabled) {
+                btnBgmToggle.innerText = l.bgmOn;
+                btnBgmToggle.classList.add('active');
+                startBgm();
+            } else {
+                btnBgmToggle.innerText = l.bgmOff;
+                btnBgmToggle.classList.remove('active');
+                stopBgm();
+            }
+        });
+
+        tabGame.addEventListener('click', () => {
+            tabGame.classList.add('active');
+            tabJournal.classList.remove('active');
+            contentGame.classList.add('active');
+            contentJournal.classList.remove('active');
+        });
+
+        tabJournal.addEventListener('click', () => {
+            tabJournal.classList.add('active');
+            tabGame.classList.remove('active');
+            contentJournal.classList.add('active');
+            contentGame.classList.remove('active');
+            renderJournal();
+        });
+
+        function speakText(text) {
+            if (!isVoiceEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = currentLang === 'hi' ? 'hi-IN' : 'en-US';
+
+            const voices = window.speechSynthesis.getVoices();
+            const matchedVoices = voices.filter(v => v.lang.startsWith(currentLang === 'hi' ? 'hi' : 'en'));
+            
+            if (matchedVoices.length > 0) {
+                if (voiceProfile === 'female') {
+                    const femaleVoice = matchedVoices.find(v => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('sura') || v.name.toLowerCase().includes('zira') || v.name.toLowerCase().includes('hi-in'));
+                    utterance.voice = femaleVoice || matchedVoices[0];
+                    utterance.pitch = 1.3;
+                    utterance.rate = 0.95;
+                } else {
+                    const maleVoice = matchedVoices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('george'));
+                    utterance.voice = maleVoice || matchedVoices[0];
+                    utterance.pitch = 0.75;
+                    utterance.rate = 0.90;
+                }
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function spawnItem() {
+            if (isPaused) return;
+            const pool = database[currentLang];
+            
+            // Trap probability based on difficulty
+            let trapChance = 0.25;
+            if (currentDiff === 'easy') trapChance = 0.15;
+            if (currentDiff === 'hard') trapChance = 0.35;
+
+            const isTrap = Math.random() < trapChance;
+
+            let itemData;
+            if (isTrap) {
+                itemData = {
+                    type: 'trap',
+                    symbol: '📱',
+                    title: currentLang === 'hi' ? 'ध्यान भटकाने वाला फोन' : 'Distracting Screen',
+                    fact: currentLang === 'hi' ? 'अत्यधिक स्क्रीन समय से ध्यान भटकता है और आँखों पर असर पड़ता है।' : 'Excessive phone screen time reduces focus and physical activity!'
+                };
+            } else {
+                const randIndex = Math.floor(Math.random() * pool.length);
+                itemData = {
+                    type: 'good',
+                    ...pool[randIndex]
+                };
+            }
+
+            // Speed multiplier based on difficulty
+            let minSpeed = 2.5, maxSpeed = 4.5;
+            if (currentDiff === 'easy') { minSpeed = 1.5; maxSpeed = 3.0; }
+            if (currentDiff === 'hard') { minSpeed = 4.0; maxSpeed = 7.0; }
+
+            items.push({
+                x: Math.random() * (canvas.width - 50) + 25,
+                y: -40,
+                radius: 24,
+                speed: minSpeed + Math.random() * (maxSpeed - minSpeed),
+                ...itemData
+            });
+        }
+
+        function createParticles(x, y) {
+            const colors = ['#f1c40f', '#2ecc71', '#3498db', '#e74c3c', '#9b59b6'];
+            for (let i = 0; i < 20; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 4;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: 3 + Math.random() * 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: 0.02 + Math.random() * 0.02
+                });
+            }
+        }
+
+        function updateRank() {
+            const ranks = translations[currentLang].ranks;
+            let rankIndex = 0;
+            if (score >= 100) rankIndex = 3;
+            else if (score >= 50) rankIndex = 2;
+            else if (score >= 20) rankIndex = 1;
+            rankVal.innerText = ranks[rankIndex];
+        }
+
+        function initGame() {
+            score = 0;
+            scoreVal.innerText = score;
+            items = [];
+            particles = [];
+            isPaused = false;
+            if (gameInterval) clearInterval(gameInterval);
+
+            // Spawn interval based on difficulty
+            let spawnIntervalTime = 1800;
+            if (currentDiff === 'easy') spawnIntervalTime = 2200;
+            if (currentDiff === 'hard') spawnIntervalTime = 1200;
+
+            gameInterval = setInterval(spawnItem, spawnIntervalTime);
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop() {
+            if (gameContainer.style.display === 'flex') {
+                if (!isPaused) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    if (keys.ArrowLeft || keys.KeyA) basket.x -= basket.speed;
+                    if (keys.ArrowRight || keys.KeyD) basket.x += basket.speed;
+                    basket.x += basket.dx;
+
+                    if (basket.x < 0) basket.x = 0;
+                    if (basket.x + basket.width > canvas.width) basket.x = canvas.width - basket.width;
+
+                    // Draw and update particles
+                    for (let p = particles.length - 1; p >= 0; p--) {
+                        let pt = particles[p];
+                        pt.x += pt.vx;
+                        pt.y += pt.vy;
+                        pt.alpha -= pt.decay;
+
+                        if (pt.alpha <= 0) {
+                            particles.splice(p, 1);
+                            continue;
+                        }
+
+                        ctx.save();
+                        ctx.globalAlpha = pt.alpha;
+                        ctx.fillStyle = pt.color;
+                        ctx.beginPath();
+                        ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // Draw Basket
+                    ctx.fillStyle = '#e67e22';
+                    ctx.beginPath();
+                    ctx.roundRect(basket.x, basket.y, basket.width, basket.height, [10, 10, 15, 15]);
+                    ctx.fill();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = '#d35400';
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(basket.x + basket.width / 2, basket.y, 25, Math.PI, 0, false);
+                    ctx.strokeStyle = '#d35400';
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+
+                    // Update and draw falling items
+                    for (let i = items.length - 1; i >= 0; i--) {
+                        let item = items[i];
+                        item.y += item.speed;
+
+                        ctx.font = '28px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(item.symbol, item.x, item.y);
+
+                        // Collision detection with basket
+                        if (
+                            item.y + item.radius >= basket.y &&
+                            item.x >= basket.x - 10 &&
+                            item.x <= basket.x + basket.width + 10
+                        ) {
+                            if (item.type === 'good') {
+                                score += 10;
+                                scoreVal.innerText = score;
+                                updateRank();
+                                soundFX.playCatch();
+                                createParticles(item.x, basket.y);
+                                triggerFactPopup(item);
+                            } else {
+                                score = Math.max(0, score - 5);
+                                scoreVal.innerText = score;
+                                updateRank();
+                                soundFX.playTrap();
+                            }
+                            items.splice(i, 1);
+                            continue;
+                        }
+
+                        // Remove item if off screen
+                        if (item.y > canvas.height + 30) {
+                            items.splice(i, 1);
+                        }
+                    }
+                }
+            }
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function triggerFactPopup(item) {
+            isPaused = true;
+            popupTitle.innerText = item.title;
+            popupFact.innerText = item.fact;
+            factPopup.style.display = 'block';
+
+            if (!discoveredItems.some(d => d.title === item.title)) {
+                discoveredItems.push(item);
+            }
+
+            speakText(item.title + ". " + item.fact);
+        }
+
+        btnResume.addEventListener('click', () => {
+            factPopup.style.display = 'none';
+            window.speechSynthesis.cancel();
+            isPaused = false;
+        });
+
+        function renderJournal() {
+            if (discoveredItems.length === 0) {
+                emptyJournalMsg.style.display = 'block';
+                journalGrid.innerHTML = '';
+                journalGrid.appendChild(emptyJournalMsg);
+                return;
+            }
+
+            emptyJournalMsg.style.display = 'none';
+            journalGrid.innerHTML = '';
+            discoveredItems.forEach(d => {
+                const card = document.createElement('div');
+                card.className = 'journal-card';
+                card.innerHTML = `
+                    <h4>${d.symbol} ${d.title}</h4>
+                    <p><strong>${d.cat}</strong></p>
+                    <p style="margin-top: 6px;">${d.fact}</p>
+                `;
+                journalGrid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
